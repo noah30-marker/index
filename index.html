@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tradespher — Elite Trading Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040710;--surface:#080d1c;--card:#0c1225;--card2:#101830;
+  --border:#182040;--border2:#1e2a50;
+  --accent:#00c8ff;--adim:rgba(0,200,255,0.1);
+  --btc:#f7931a;--bdim:rgba(247,147,26,0.1);
+  --green:#00e5a0;--gdim:rgba(0,229,160,0.1);
+  --red:#ff4060;--rdim:rgba(255,64,96,0.1);
+  --gold:#ffd166;
+  --text:#dde4f5;--text2:#8896b8;--muted:#4a587a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;min-height:100vh;overflow-x:hidden;}
+img,svg{max-width:100%;}
+
+/* BG */
+.bg-fx{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.bg-fx::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 15% 20%,rgba(0,200,255,0.06),transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% 80%,rgba(247,147,26,0.05),transparent 70%),
+    linear-gradient(rgba(0,200,255,0.015) 1px,transparent 1px) 0 0/52px 52px,
+    linear-gradient(90deg,rgba(0,200,255,0.015) 1px,transparent 1px) 0 0/52px 52px;}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1;}
+.page.on{display:flex;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* ══════════════ AUTH PAGES ══════════════ */
+.auth{min-height:100vh;align-items:stretch;flex-direction:row;}
+
+/* Left decorative panel — hidden on mobile */
+.a-left{
+  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:60px 40px;position:relative;overflow:hidden;border-right:1px solid var(--border);
+}
+.a-left::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,200,255,0.05),rgba(0,229,160,0.03));}
+.a-brand-abs{position:absolute;top:28px;left:36px;display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--green));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.a-hero{text-align:center;max-width:380px;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--adim);border:1px solid rgba(0,200,255,0.2);border-radius:20px;padding:5px 14px;font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;}
+.a-hero h1{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,#fff 40%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.a-hero p{color:var(--text2);font-size:0.9rem;line-height:1.65;margin-bottom:32px;}
+.sparkline{width:100%;max-width:300px;height:110px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:0 auto 32px;}
+.sparkline svg{width:100%;height:100%;}
+.a-stats{display:flex;gap:24px;justify-content:center;}
+.a-stat-v{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent);display:block;}
+.a-stat-l{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;}
+
+/* Right form panel */
+.a-right{
+  width:460px;flex-shrink:0;display:flex;flex-direction:column;
+  justify-content:center;padding:50px 44px;background:var(--surface);
+  overflow-y:auto;
+}
+
+/* Mobile: show brand inside form, hide left panel */
+.a-brand-top{display:none;align-items:center;gap:10px;margin-bottom:28px;}
+
+/* form elements */
+.af-title{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;margin-bottom:5px;}
+.af-sub{color:var(--text2);font-size:0.86rem;margin-bottom:26px;}
+.af-sub a{color:var(--accent);cursor:pointer;font-weight:600;}
+.btc-note{display:flex;align-items:center;gap:10px;background:var(--bdim);border:1px solid rgba(247,147,26,0.18);border-radius:10px;padding:11px 13px;margin-bottom:20px;font-size:0.77rem;color:var(--text2);}
+.btc-dot{width:26px;height:26px;border-radius:50%;background:var(--btc);display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+.field input,.field select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Figtree',sans-serif;font-size:0.9rem;outline:none;transition:all 0.2s;-webkit-appearance:none;}
+.field input:focus{border-color:var(--accent);background:var(--adim);box-shadow:0 0 0 3px rgba(0,200,255,0.07);}
+.field input::placeholder{color:var(--muted);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rem-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:0.82rem;flex-wrap:wrap;gap:8px;}
+.ck-lbl{display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--text2);}
+.ck-lbl input[type=checkbox]{accent-color:var(--accent);cursor:pointer;width:15px;height:15px;}
+.forgot{color:var(--accent);cursor:pointer;font-weight:600;}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--accent),#0088bb);color:var(--bg);font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.25s;margin-bottom:18px;box-shadow:0 4px 20px rgba(0,200,255,0.22);}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,200,255,0.38);}
+.auth-btn:active{transform:translateY(0);}
+.auth-btn.green-btn{background:linear-gradient(135deg,var(--green),#00aa70);box-shadow:0 4px 20px rgba(0,229,160,0.22);}
+.auth-btn.green-btn:hover{box-shadow:0 8px 32px rgba(0,229,160,0.38);}
+.terms{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.5;margin-top:4px;}
+.terms a{color:var(--text2);cursor:pointer;}
+.check-agree{display:flex;align-items:flex-start;gap:8px;margin-bottom:18px;font-size:0.8rem;color:var(--text2);}
+.check-agree input{margin-top:3px;accent-color:var(--accent);flex-shrink:0;width:15px;height:15px;}
+.check-agree a{color:var(--accent);cursor:pointer;}
+
+/* ══════════════ APP SHELL ══════════════ */
+#pg-app{flex-direction:column;min-height:100vh;}
+
+/* TOP NAV */
+.topnav{
+  height:60px;display:flex;align-items:center;
+  background:rgba(8,13,28,0.97);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;gap:12px;
+  position:sticky;top:0;z-index:200;flex-shrink:0;
+}
+.tn-brand{display:flex;align-items:center;gap:8px;margin-right:4px;flex-shrink:0;}
+.tn-brand .brand-name{font-size:1.1rem;}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.ntab{padding:6px 12px;border-radius:7px;border:none;background:transparent;color:var(--text2);font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;flex-shrink:0;}
+.ntab:hover{color:var(--text);background:var(--card);}
+.ntab.on{color:var(--accent);background:var(--adim);}
+.topnav-r{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
+.livebadge{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--green);font-weight:700;}
+.nbtn{padding:6px 12px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-family:'Figtree',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.nbtn:hover{border-color:var(--btc);color:var(--btc);}
+.nbtn-p{padding:6px 12px;border-radius:7px;border:none;background:linear-gradient(135deg,var(--accent),#0088bb);color:var(--bg);font-family:'Figtree',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.nbtn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,200,255,0.3);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--bg);cursor:pointer;flex-shrink:0;}
+
+/* MOBILE BOTTOM NAV */
+.mob-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:60px;z-index:200;
+  background:rgba(8,13,28,0.97);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding:0 4px;
+}
+.mob-nav-inner{display:flex;height:100%;}
+.mnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;background:transparent;border:none;cursor:pointer;
+  color:var(--muted);font-family:'Figtree',sans-serif;font-size:0.6rem;font-weight:600;
+  transition:all 0.15s;padding:4px 0;
+}
+.mnav-btn.on{color:var(--accent);}
+.mnav-btn .mico{font-size:1.1rem;line-height:1;}
+
+/* VIEWS */
+.view{display:none;}
+.view.on{display:block;}
+
+/* ══════════════ DASHBOARD ══════════════ */
+.dash{padding:20px 16px 80px;}
+
+.welcome{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.welcome h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:2px;}
+.welcome p{color:var(--text2);font-size:0.8rem;}
+.wbtns{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-dep{padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--btc),#cc7000);color:#fff;font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-dep:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(247,147,26,0.35);}
+.btn-dep:active{transform:translateY(0);}
+.btn-sec{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;color:var(--text);font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent);}
+
+/* balance cards */
+.bcards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+.bcard{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;position:relative;overflow:hidden;transition:all 0.2s;}
+.bcard::after{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;filter:blur(25px);opacity:0.35;}
+.bcard.c1::after{background:var(--accent);}
+.bcard.c2::after{background:var(--green);}
+.bcard.c3::after{background:var(--btc);}
+.bcard.c4::after{background:var(--gold);}
+.bcard:hover{border-color:var(--border2);transform:translateY(-2px);}
+.bcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.bcard-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;}
+.c1 .bcard-ico{background:var(--adim);color:var(--accent);}
+.c2 .bcard-ico{background:var(--gdim);color:var(--green);}
+.c3 .bcard-ico{background:var(--bdim);color:var(--btc);}
+.c4 .bcard-ico{background:rgba(255,209,102,0.1);color:var(--gold);}
+.bchg{font-size:0.67rem;font-weight:700;padding:2px 6px;border-radius:5px;}
+.bchg.p{background:var(--gdim);color:var(--green);}
+.bchg.n{background:var(--rdim);color:var(--red);}
+.blbl{font-size:0.65rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text2);margin-bottom:4px;}
+.bval{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;}
+.bsub{font-size:0.68rem;color:var(--muted);}
+
+/* section title */
+.sec-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;margin-bottom:12px;}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px;}
+.card-h{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+.card-title{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;}
+.card-sub{font-size:0.7rem;color:var(--text2);margin-top:1px;}
+.card-link{font-size:0.7rem;color:var(--accent);cursor:pointer;}
+.tf-row{display:flex;gap:3px;}
+.tf{padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.62rem;cursor:pointer;transition:all 0.15s;}
+.tf.on{background:var(--adim);border-color:var(--accent);color:var(--accent);}
+.tf:hover:not(.on){border-color:var(--border2);color:var(--text2);}
+
+/* chart */
+.csvg{padding:12px;overflow:hidden;}
+.csvg svg{width:100%;display:block;}
+
+/* allocation */
+.alloc-list{padding:4px 16px 12px;}
+.alloc-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(24,32,64,0.5);}
+.alloc-row:last-child{border:none;}
+.al-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.al-name{flex:1;font-size:0.8rem;font-weight:600;}
+.al-bar{width:50px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.al-fill{height:100%;border-radius:2px;}
+.al-pct{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text2);}
+
+/* activity */
+.act-list{padding:2px 0 6px;}
+.act-r{display:flex;align-items:center;gap:10px;padding:9px 16px;transition:background 0.15s;}
+.act-r:hover{background:rgba(255,255,255,0.015);}
+.act-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.78rem;flex-shrink:0;}
+.act-ico.b{background:var(--gdim);}
+.act-ico.s{background:var(--rdim);}
+.act-ico.d{background:var(--bdim);}
+.act-ico.i{background:rgba(255,209,102,0.1);}
+.act-info{flex:1;min-width:0;}
+.act-n{font-size:0.8rem;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-t{font-size:0.67rem;color:var(--muted);}
+.act-a{font-family:'JetBrains Mono',monospace;font-size:0.78rem;font-weight:700;flex-shrink:0;}
+.act-a.p{color:var(--green);}
+.act-a.n{color:var(--red);}
+
+/* positions table */
+.ptable{padding:0 16px 12px;overflow-x:auto;}
+.ptable-inner{min-width:360px;}
+.ph{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;padding:7px 0 5px;border-bottom:1px solid var(--border);}
+.pth{font-size:0.6rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);}
+.pr{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;padding:9px 0;border-bottom:1px solid rgba(24,32,64,0.4);align-items:center;}
+.pr:last-child{border:none;}
+.pn{font-weight:700;font-size:0.8rem;}
+.side-lbl{font-size:0.62rem;font-weight:700;padding:2px 5px;border-radius:4px;display:inline-block;margin-top:2px;}
+.side-lbl.long{background:var(--gdim);color:var(--green);}
+.side-lbl.short{background:var(--rdim);color:var(--red);}
+.pmono{font-family:'JetBrains Mono',monospace;font-size:0.74rem;}
+
+/* market rows */
+.mkt-r{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid rgba(24,32,64,0.4);}
+.mkt-r:last-child{border:none;}
+.mkt-nm{font-size:0.82rem;font-weight:600;}
+.mkt-p{font-family:'JetBrains Mono',monospace;font-size:0.76rem;}
+.mkt-ch{font-size:0.72rem;font-weight:700;}
+
+/* 2-col grid helpers */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ══════════════ TRADE PAGE ══════════════ */
+.v-trade-wrap{padding:16px 16px 80px;}
+
+.ticker-strip{
+  display:flex;overflow-x:auto;gap:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:14px;scrollbar-width:none;
+}
+.ticker-strip::-webkit-scrollbar{display:none;}
+.tk-item{padding:9px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background 0.15s;flex-shrink:0;min-width:110px;}
+.tk-item:last-child{border-right:none;}
+.tk-item.on{background:var(--adim);}
+.tk-item:hover:not(.on){background:var(--card);}
+.tk-n{font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+.tk-p{font-family:'JetBrains Mono',monospace;font-size:0.86rem;font-weight:700;margin:2px 0;}
+.tk-c{font-size:0.64rem;font-weight:700;}
+.tk-c.p{color:var(--green);}
+.tk-c.n{color:var(--red);}
+
+/* order form card */
+.order-form-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-top:14px;}
+.tbal{background:linear-gradient(135deg,var(--adim),transparent);border:1px solid rgba(0,200,255,0.14);border-radius:11px;padding:12px 14px;margin-bottom:12px;}
+.tbal-l{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin-bottom:3px;}
+.tbal-v{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;}
+.tbal-b{font-size:0.7rem;color:var(--btc);margin-top:2px;}
+.tbtn-dep{width:100%;padding:8px;border-radius:7px;border:1px solid rgba(247,147,26,0.28);background:var(--bdim);color:var(--btc);font-family:'Figtree',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:14px;}
+.tbtn-dep:hover{background:rgba(247,147,26,0.18);}
+.side-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:14px;}
+.sbtn{padding:8px;border-radius:7px;border:1.5px solid var(--border);background:transparent;font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;color:var(--muted);}
+.sbtn.buy{background:var(--gdim);border-color:var(--green);color:var(--green);}
+.sbtn.sell{background:var(--rdim);border-color:var(--red);color:var(--red);}
+.tlbl{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:5px;display:block;}
+.tinput{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.84rem;outline:none;transition:all 0.2s;margin-bottom:11px;-webkit-appearance:none;}
+.tinput:focus{border-color:var(--accent);background:var(--adim);}
+.levrow{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.levbtn{flex:1;min-width:36px;padding:6px 3px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;cursor:pointer;transition:all 0.15s;text-align:center;}
+.levbtn.on{background:var(--adim);border-color:var(--accent);color:var(--accent);}
+.tsum{background:var(--card2);border-radius:8px;padding:10px 13px;margin-bottom:12px;}
+.trow{display:flex;justify-content:space-between;font-size:0.72rem;padding:3px 0;}
+.trow span:first-child{color:var(--text2);}
+.trow span:last-child{font-family:'JetBrains Mono',monospace;}
+.texec{width:100%;padding:13px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--green),#00aa70);color:var(--bg);font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.texec:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(0,229,160,0.3);}
+.texec.sm{background:linear-gradient(135deg,var(--red),#cc2040);}
+.texec.sm:hover{box-shadow:0 5px 20px rgba(255,64,96,0.3);}
+
+/* order book */
+.ob-hdr{display:grid;grid-template-columns:1fr 1fr 1fr;padding:6px 14px 7px;border-bottom:1px solid var(--border);}
+.ob-th{font-size:0.6rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);}
+.ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px 14px;position:relative;cursor:pointer;font-size:0.71rem;}
+.ob-row:hover{background:rgba(255,255,255,0.018);}
+.ob-fill{position:absolute;top:0;bottom:0;right:0;opacity:0.07;border-radius:2px 0 0 2px;}
+.ob-fill.a{background:var(--red);}
+.ob-fill.b{background:var(--green);}
+.ob-p.a{color:var(--red);font-family:'JetBrains Mono',monospace;font-weight:700;}
+.ob-p.b{color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700;}
+.ob-mid{text-align:center;padding:7px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:700;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:3px 0;}
+.ob-mid span{font-size:0.6rem;color:var(--muted);margin-left:6px;}
+
+/* panel tabs (for trade page sections) */
+.ptabs{display:flex;border-bottom:1px solid var(--border);}
+.ptab{flex:1;padding:11px;text-align:center;font-size:0.74rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.15s;border-bottom:2px solid transparent;}
+.ptab.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--adim);}
+.ptab:hover:not(.on){color:var(--text2);}
+
+/* ══════════════ INVESTMENTS ══════════════ */
+.invest{padding:20px 16px 80px;}
+
+.inv-hero{
+  background:linear-gradient(135deg,var(--card),var(--card2));
+  border:1px solid var(--border);border-radius:14px;
+  padding:22px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.inv-hero::before{content:'';position:absolute;right:-20px;top:-20px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,102,0.15),transparent 70%);}
+.inv-hero h2{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;margin-bottom:7px;}
+.inv-hero p{color:var(--text2);font-size:0.84rem;line-height:1.6;margin-bottom:16px;}
+.inv-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.invs{text-align:center;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;flex:1;min-width:80px;}
+.invs-v{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--gold);display:block;}
+.invs-l{font-size:0.62rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.plan{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.25s;}
+.plan::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.plan.s::before{background:linear-gradient(90deg,var(--accent),#0088bb);}
+.plan.g::before{background:linear-gradient(90deg,var(--gold),#cc9900);}
+.plan.e::before{background:linear-gradient(90deg,var(--green),#00aa70);}
+.plan:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,0.4);}
+.plan.feat{border-color:rgba(255,209,102,0.28);background:linear-gradient(135deg,var(--card),rgba(255,209,102,0.025));}
+.plan-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:var(--bg);font-size:0.58rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px;}
+.plan-ico{font-size:1.5rem;margin-bottom:8px;}
+.plan-name{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;margin-bottom:3px;}
+.plan-desc{font-size:0.75rem;color:var(--text2);margin-bottom:12px;line-height:1.5;}
+.plan-ret{font-family:'JetBrains Mono',monospace;font-size:1.75rem;font-weight:700;margin-bottom:1px;}
+.plan.s .plan-ret{color:var(--accent);}
+.plan.g .plan-ret{color:var(--gold);}
+.plan.e .plan-ret{color:var(--green);}
+.plan-ret-sub{font-size:0.68rem;color:var(--text2);margin-bottom:14px;}
+.plan-feats{list-style:none;margin-bottom:16px;}
+.plan-feats li{display:flex;align-items:center;gap:6px;font-size:0.77rem;padding:4px 0;color:var(--text2);}
+.plan-feats li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+.plan-btn{width:100%;padding:10px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:0.84rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.plan.s .plan-btn{background:var(--adim);color:var(--accent);border:1.5px solid rgba(0,200,255,0.22);}
+.plan.g .plan-btn{background:rgba(255,209,102,0.1);color:var(--gold);border:1.5px solid rgba(255,209,102,0.22);}
+.plan.e .plan-btn{background:var(--gdim);color:var(--green);border:1.5px solid rgba(0,229,160,0.22);}
+.plan-btn:hover{filter:brightness(1.2);transform:translateY(-1px);}
+
+/* active plans */
+.active-plans{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.ap-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;transition:border-color 0.2s;}
+.ap-card:hover{border-color:var(--border2);}
+.ap-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.ap-nm{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;}
+.ap-tag{font-size:0.67rem;font-weight:700;padding:2px 7px;border-radius:5px;}
+.ap-tag.s{background:var(--adim);color:var(--accent);}
+.ap-tag.g{background:rgba(255,209,102,0.1);color:var(--gold);}
+.ap-tag.e{background:var(--gdim);color:var(--green);}
+.ap-amt{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;margin-bottom:3px;}
+.ap-earn{font-size:0.75rem;color:var(--green);font-weight:600;margin-bottom:10px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:0.67rem;color:var(--text2);margin-bottom:4px;}
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.prog-f{height:100%;border-radius:2px;}
+.pf-c{background:linear-gradient(90deg,var(--accent),var(--green));}
+.pf-g{background:linear-gradient(90deg,var(--gold),#cc9900);}
+.ap-meta{display:flex;gap:10px;flex-wrap:wrap;}
+.ap-m{font-size:0.68rem;color:var(--text2);}
+.ap-m strong{color:var(--text);font-weight:600;}
+
+/* how it works */
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);padding:16px;}
+.how-step{text-align:center;padding:0 10px;border-right:1px solid var(--border);}
+.how-step:last-child{border:none;}
+.how-ico{font-size:1.5rem;margin-bottom:6px;}
+.how-t{font-weight:700;font-size:0.82rem;margin-bottom:4px;}
+.how-d{font-size:0.72rem;color:var(--text2);line-height:1.5;}
+
+/* ══════════════ PORTFOLIO ══════════════ */
+.port{padding:20px 16px 80px;}
+
+/* ══════════════ MODAL ══════════════ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;padding:16px;}
+.modal-bg.on{opacity:1;pointer-events:all;}
+.mbox{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:28px 24px;width:100%;max-width:420px;position:relative;transform:translateY(20px) scale(0.97);transition:transform 0.3s;max-height:90vh;overflow-y:auto;}
+.modal-bg.on .mbox{transform:translateY(0) scale(1);}
+.mx{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.mx:hover{border-color:var(--red);color:var(--red);}
+.mtitle{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;}
+.msub{font-size:0.82rem;color:var(--text2);margin-bottom:20px;}
+.mbtc-banner{display:flex;align-items:center;gap:10px;background:var(--bdim);border:1px solid rgba(247,147,26,0.18);border-radius:11px;padding:12px;margin-bottom:18px;}
+.mbtc-ico{width:38px;height:38px;border-radius:50%;background:var(--btc);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.mbtc-t{font-weight:700;font-size:0.86rem;color:var(--btc);margin-bottom:2px;}
+.mbtc-s{font-size:0.72rem;color:var(--text2);}
+.mlbl{font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:5px;display:block;}
+.mrow{display:flex;gap:8px;margin-bottom:5px;}
+.minput{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.86rem;outline:none;transition:all 0.2s;-webkit-appearance:none;}
+.minput:focus{border-color:var(--btc);background:var(--bdim);}
+.mcurr{background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--btc);font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;display:flex;align-items:center;}
+.mbtceq{font-size:0.7rem;color:var(--btc);font-family:'JetBrains Mono',monospace;margin-bottom:14px;}
+.qr-c{display:flex;justify-content:center;margin:12px 0;}
+.qr-w{background:#fff;padding:12px;border-radius:10px;display:inline-block;}
+.qr{width:130px;height:130px;background:
+  linear-gradient(#000,#000) 0 0/32px 32px no-repeat,
+  linear-gradient(#000,#000) 100% 0/32px 32px no-repeat,
+  linear-gradient(#000,#000) 0 100%/32px 32px no-repeat,
+  linear-gradient(#fff,#fff) 5px 5px/22px 22px no-repeat,
+  linear-gradient(#fff,#fff) calc(100% - 5px) 5px/22px 22px no-repeat,
+  linear-gradient(#fff,#fff) 5px calc(100% - 5px)/22px 22px no-repeat,
+  linear-gradient(#000,#000) 10px 10px/12px 12px no-repeat,
+  linear-gradient(#000,#000) calc(100% - 10px) 10px/12px 12px no-repeat,
+  linear-gradient(#000,#000) 10px calc(100% - 10px)/12px 12px no-repeat,
+  linear-gradient(#000,#000) 42px 0/6px 6px no-repeat,
+  linear-gradient(#000,#000) 55px 0/6px 6px no-repeat,
+  linear-gradient(#000,#000) 72px 0/6px 6px no-repeat,
+  linear-gradient(#000,#000) 90px 0/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 8px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 60px 8px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 84px 8px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 17px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 52px 17px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 68px 17px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 96px 17px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 26px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 60px 26px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 86px 26px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 48px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 60px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 76px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 94px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 51px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 56px 51px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 72px 51px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 88px 51px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 112px 51px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 12px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 26px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 56px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 18px 56px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 66px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 12px 66px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 26px 66px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 104px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 118px 42px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 112px 60px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 104px 66px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 118px 66px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 58px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 76px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 94px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 112px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 14px 78px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 12px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 26px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 58px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 80px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 98px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 116px 92px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 0 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 20px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 60px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 78px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 96px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 114px 106px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 6px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 24px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 42px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 64px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 82px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 100px 118px/6px 6px no-repeat,
+  linear-gradient(#000,#000) 118px 118px/6px 6px no-repeat,
+  #fff;}
+.addr-box{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-bottom:10px;}
+.addr-lbl{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.addr-val{font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:var(--btc);word-break:break-all;line-height:1.6;}
+.copybtn{width:100%;padding:10px;border-radius:8px;border:1.5px solid rgba(247,147,26,0.28);background:var(--bdim);color:var(--btc);font-family:'Figtree',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;}
+.copybtn:hover{background:rgba(247,147,26,0.18);}
+.copybtn.done{background:var(--gdim);border-color:var(--green);color:var(--green);}
+.infotip{background:var(--adim);border:1px solid rgba(0,200,255,0.12);border-radius:8px;padding:10px 13px;font-size:0.73rem;color:var(--text2);line-height:1.5;margin-bottom:14px;}
+.infotip strong{color:var(--accent);}
+.mconfirm{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--btc),#cc7000);color:#fff;font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 18px rgba(247,147,26,0.28);}
+.mconfirm:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(247,147,26,0.42);}
+.msum{background:var(--card2);border-radius:8px;padding:11px 13px;margin:10px 0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:76px;right:16px;background:var(--card2);border:1px solid var(--green);border-radius:11px;padding:11px 16px;display:flex;align-items:center;gap:9px;z-index:600;transform:translateY(60px);opacity:0;transition:all 0.3s;box-shadow:0 8px 28px rgba(0,0,0,0.6);max-width:290px;}
+.toast.on{transform:translateY(0);opacity:1;}
+
+/* scrollbars */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ══════════════ RESPONSIVE BREAKPOINTS ══════════════ */
+
+/* Tablet: hide left panel, full-width form */
+@media(max-width:900px){
+  .a-left{display:none;}
+  .a-right{width:100%;max-width:100%;padding:40px 32px;min-height:100vh;justify-content:flex-start;padding-top:60px;}
+  .a-brand-top{display:flex;}
+  .bcards{grid-template-columns:repeat(2,1fr);}
+  .grid2{grid-template-columns:1fr;}
+  .plans{grid-template-columns:1fr;}
+  .active-plans{grid-template-columns:1fr;}
+  .how-steps{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .how-step{border-right:none;border-bottom:1px solid var(--border);padding-bottom:14px;}
+  .how-step:nth-child(odd){border-right:1px solid var(--border);}
+  .how-step:nth-last-child(-n+2){border-bottom:none;}
+}
+
+/* Mobile: bottom nav, stacked layouts */
+@media(max-width:600px){
+  .a-right{padding:32px 20px;padding-top:48px;}
+  .field-row{grid-template-columns:1fr;}
+  .topnav{padding:0 12px;gap:8px;}
+  .nav-tabs{display:none;}
+  .livebadge{display:none;}
+  .nbtn{display:none;}
+  .nbtn-p{font-size:0.72rem;padding:5px 10px;}
+  .mob-nav{display:flex;}
+  .dash,.invest,.port,.v-trade-wrap{padding-bottom:80px;}
+  .bcards{grid-template-columns:1fr 1fr;gap:10px;}
+  .bval{font-size:1.05rem;}
+  .welcome{flex-direction:column;align-items:flex-start;gap:10px;}
+  .wbtns{width:100%;}
+  .btn-dep,.btn-sec{flex:1;text-align:center;font-size:0.8rem;}
+  .plans{grid-template-columns:1fr;}
+  .active-plans{grid-template-columns:1fr;}
+  .how-steps{grid-template-columns:1fr 1fr;}
+  .how-step{border-right:none;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:4px;}
+  .how-step:nth-child(odd){border-right:1px solid var(--border);}
+  .how-step:nth-last-child(-n+2){border-bottom:none;}
+  .grid2{grid-template-columns:1fr;}
+  .toast{bottom:72px;right:12px;left:12px;max-width:none;}
+  .mbox{padding:24px 18px;}
+  .modal-bg{padding:12px;}
+  .inv-hero h2{font-size:1.15rem;}
+  .inv-hero p{font-size:0.8rem;}
+  .inv-stats{gap:8px;}
+  .invs{padding:8px 10px;}
+  .invs-v{font-size:0.9rem;}
+}
+
+/* Very small screens */
+@media(max-width:380px){
+  .bcards{grid-template-columns:1fr;}
+  .bval{font-size:1.15rem;}
+  .bcard{padding:14px;}
+}
+
+/* ══════════════ SETTINGS ══════════════ */
+.settings-page{padding:20px 16px 80px;}
+.settings-section-title{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--text2);margin:20px 0 8px;padding-left:2px;}
+.settings-card{padding:16px 18px;margin-bottom:0;}
+.settings-profile-header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.settings-avatar-big{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:var(--bg);flex-shrink:0;}
+.settings-username{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:2px;}
+.settings-email-disp{font-size:0.78rem;color:var(--text2);}
+.settings-edit-btn{margin-left:auto;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Figtree',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.settings-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.settings-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.settings-field{margin-bottom:12px;}
+.settings-field label{display:block;font-size:0.66rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:5px;}
+.settings-field input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'Figtree',sans-serif;font-size:0.88rem;outline:none;transition:all 0.2s;}
+.settings-field input:focus{border-color:var(--accent);background:var(--adim);}
+.settings-field input::placeholder{color:var(--muted);}
+.settings-save-btn{padding:9px 18px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),#0088bb);color:var(--bg);font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.settings-save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,200,255,0.3);}
+.settings-cancel-btn{padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);font-family:'Figtree',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.settings-cancel-btn:hover{border-color:var(--red);color:var(--red);}
+.settings-row{display:flex;align-items:center;gap:14px;padding:2px 0;}
+.settings-row-info{flex:1;min-width:0;}
+.settings-row-title{font-size:0.87rem;font-weight:600;margin-bottom:2px;}
+.settings-row-sub{font-size:0.72rem;color:var(--text2);line-height:1.4;}
+.settings-action-btn{padding:7px 14px;border-radius:7px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Figtree',sans-serif;font-size:0.76rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.settings-action-btn:hover{border-color:var(--accent);color:var(--accent);}
+.settings-action-btn.danger{border-color:rgba(255,64,96,0.3);color:var(--red);}
+.settings-action-btn.danger:hover{background:var(--rdim);border-color:var(--red);}
+.settings-select{padding:7px 10px;border-radius:7px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-family:'Figtree',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;outline:none;-webkit-appearance:none;transition:all 0.2s;flex-shrink:0;}
+.settings-select:focus{border-color:var(--accent);}
+/* Toggle switch */
+.settings-toggle-wrap{flex-shrink:0;}
+.settings-toggle-input{display:none;}
+.settings-toggle{
+  display:block;width:40px;height:22px;border-radius:11px;
+  background:var(--border2);cursor:pointer;position:relative;
+  transition:background 0.25s;
+}
+.settings-toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;transition:transform 0.25s;
+}
+.settings-toggle-input:checked+.settings-toggle{background:var(--accent);}
+.settings-toggle-input:checked+.settings-toggle::after{transform:translateX(18px);}
+@media(max-width:600px){
+  .settings-field-row{grid-template-columns:1fr;}
+  .settings-profile-header{gap:10px;}
+  .settings-avatar-big{width:46px;height:46px;font-size:0.95rem;}
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div class="page auth on" id="pg-login">
+  <div class="a-left">
+    <div class="a-brand-abs">
+      <div class="brand-icon">⟡</div>
+      <span class="brand-name">Tradespher</span>
+    </div>
+    <div class="a-hero">
+      <div class="hero-badge"><span class="live-dot"></span> Markets Open · 24/7</div>
+      <h1>Trade The Future</h1>
+      <p>Professional-grade crypto trading with institutional liquidity, real-time analytics, and Bitcoin-native deposits.</p>
+      <div class="sparkline">
+        <svg viewBox="0 0 300 110" preserveAspectRatio="none">
+          <defs><linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,200,255,0.28)"/><stop offset="100%" stop-color="rgba(0,200,255,0)"/></linearGradient></defs>
+          <path d="M0,95 L20,88 L40,80 L60,84 L80,68 L100,56 L120,62 L140,46 L160,50 L180,36 L200,28 L220,32 L240,18 L260,22 L280,10 L300,4 L300,110 L0,110Z" fill="url(#sg1)"/>
+          <path d="M0,95 L20,88 L40,80 L60,84 L80,68 L100,56 L120,62 L140,46 L160,50 L180,36 L200,28 L220,32 L240,18 L260,22 L280,10 L300,4" fill="none" stroke="#00c8ff" stroke-width="2"/>
+          <circle cx="300" cy="4" r="4" fill="#00e5a0"/>
+        </svg>
+      </div>
+      <div class="a-stats">
+        <div><span class="a-stat-v">$4.2B</span><span class="a-stat-l">Daily Volume</span></div>
+        <div><span class="a-stat-v">120K+</span><span class="a-stat-l">Traders</span></div>
+        <div><span class="a-stat-v">99.9%</span><span class="a-stat-l">Uptime</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-right">
+    <!-- Mobile brand -->
+    <div class="a-brand-top">
+      <div class="brand-icon">⟡</div>
+      <span class="brand-name">Tradespher</span>
+    </div>
+
+    <div class="af-title">Welcome back</div>
+    <div class="af-sub">Don't have an account? <a onclick="goPage('pg-signup')">Create one free →</a></div>
+
+    <div class="btc-note">
+      <div class="btc-dot">₿</div>
+      <span>Tradespher uses <strong style="color:var(--btc)">Bitcoin-only deposits</strong> — no banks, no borders.</span>
+    </div>
+
+    <div class="field"><label>Email Address</label><input type="email" placeholder="you@email.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input type="password" placeholder="Enter your password" autocomplete="current-password"></div>
+
+    <div class="rem-row">
+      <label class="ck-lbl"><input type="checkbox" checked> Remember me</label>
+      <span class="forgot">Forgot password?</span>
+    </div>
+
+    <button class="auth-btn" onclick="doLogin()">Sign In to Tradespher</button>
+
+    <div class="terms">Protected by 256-bit encryption. By signing in you agree to our <a>Terms</a> &amp; <a>Privacy Policy</a>.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SIGN UP ═══════════════ -->
+<div class="page auth" id="pg-signup">
+  <div class="a-left">
+    <div class="a-brand-abs">
+      <div class="brand-icon">⟡</div>
+      <span class="brand-name">Tradespher</span>
+    </div>
+    <div class="a-hero">
+      <div class="hero-badge">✦ Join 120,000+ Traders</div>
+      <h1>Start Trading Today</h1>
+      <p>Create your free account in under 60 seconds. No KYC required — just deposit BTC and start trading instantly.</p>
+      <div class="sparkline">
+        <svg viewBox="0 0 300 110" preserveAspectRatio="none">
+          <defs><linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,229,160,0.28)"/><stop offset="100%" stop-color="rgba(0,229,160,0)"/></linearGradient></defs>
+          <path d="M0,105 L30,96 L60,86 L90,90 L120,72 L150,58 L180,64 L210,44 L240,30 L270,18 L300,6 L300,110 L0,110Z" fill="url(#sg2)"/>
+          <path d="M0,105 L30,96 L60,86 L90,90 L120,72 L150,58 L180,64 L210,44 L240,30 L270,18 L300,6" fill="none" stroke="#00e5a0" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="a-stats">
+        <div><span class="a-stat-v">0 Fees</span><span class="a-stat-l">To Sign Up</span></div>
+        <div><span class="a-stat-v">50+</span><span class="a-stat-l">Pairs</span></div>
+        <div><span class="a-stat-v">100×</span><span class="a-stat-l">Leverage</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-right">
+    <!-- Mobile brand -->
+    <div class="a-brand-top">
+      <div class="brand-icon">⟡</div>
+      <span class="brand-name">Tradespher</span>
+    </div>
+
+    <div class="af-title">Create your account</div>
+    <div class="af-sub">Already have an account? <a onclick="goPage('pg-login')">Sign in →</a></div>
+
+    <div class="field-row">
+      <div class="field"><label>First Name</label><input type="text" placeholder="John" autocomplete="given-name"></div>
+      <div class="field"><label>Last Name</label><input type="text" placeholder="Doe" autocomplete="family-name"></div>
+    </div>
+    <div class="field"><label>Email Address</label><input type="email" placeholder="you@email.com" autocomplete="email"></div>
+    <div class="field"><label>Username</label><input type="text" placeholder="Choose a username"></div>
+    <div class="field"><label>Password</label><input type="password" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
+    <div class="field"><label>Confirm Password</label><input type="password" placeholder="Repeat your password" autocomplete="new-password"></div>
+
+    <div class="check-agree">
+      <input type="checkbox">
+      <span>I agree to the <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a></span>
+    </div>
+
+    <button class="auth-btn green-btn" onclick="doLogin()">Create Free Account →</button>
+
+    <div class="terms">Your data is protected with 256-bit SSL encryption.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div class="page" id="pg-app" style="flex-direction:column;min-height:100vh;">
+
+  <!-- TOP NAV (desktop/tablet) -->
+  <nav class="topnav">
+    <div class="tn-brand">
+      <div class="brand-icon" style="width:28px;height:28px;font-size:0.85rem;">⟡</div>
+      <span class="brand-name" style="font-size:1rem;">Tradespher</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="ntab on" onclick="switchView(this,'v-dash')">Dashboard</button>
+      <button class="ntab" onclick="switchView(this,'v-trade')">Trade</button>
+      <button class="ntab" onclick="switchView(this,'v-invest')">Investments</button>
+      <button class="ntab" onclick="switchView(this,'v-port')">Portfolio</button>
+      <button class="ntab" onclick="switchView(this,'v-settings')">⚙ Settings</button>
+    </div>
+    <div class="topnav-r">
+      <div class="livebadge"><span class="live-dot"></span> LIVE</div>
+      <button class="nbtn" onclick="openDep()">₿ Deposit</button>
+      <button class="nbtn-p" onclick="openDep()">+ Fund</button>
+      <div class="avatar" onclick="switchView(null,'v-settings');highlightSettingsTab()" title="Settings">U</div>
+    </div>
+  </nav>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mob-nav">
+    <div class="mob-nav-inner">
+      <button class="mnav-btn on" id="mn-dash" onclick="mobNav(this,'v-dash')"><span class="mico">📊</span>Dashboard</button>
+      <button class="mnav-btn" id="mn-trade" onclick="mobNav(this,'v-trade')"><span class="mico">⚡</span>Trade</button>
+      <button class="mnav-btn" id="mn-invest" onclick="mobNav(this,'v-invest')"><span class="mico">💰</span>Invest</button>
+      <button class="mnav-btn" id="mn-port" onclick="mobNav(this,'v-port')"><span class="mico">📁</span>Portfolio</button>
+      <button class="mnav-btn" id="mn-settings" onclick="mobNav(this,'v-settings')"><span class="mico">⚙️</span>Settings</button>
+    </div>
+  </div>
+
+  <!-- ─────────── DASHBOARD ─────────── -->
+  <div class="view on" id="v-dash">
+    <div class="dash">
+      <div class="welcome">
+        <div>
+          <h2>Good day 👋</h2>
+        </div>
+        <div class="wbtns">
+          <button class="btn-dep" onclick="openDep()">₿ Deposit BTC</button>
+          <button class="btn-sec" onclick="switchView(document.querySelectorAll('.ntab')[1],'v-trade');document.getElementById('mn-trade').click()">⚡ Trade</button>
+        </div>
+      </div>
+
+      <!-- Balance Cards -->
+      <div class="bcards">
+        <div class="bcard c1">
+          <div class="bcard-top"><div class="bcard-ico">💼</div><span class="bchg p">▲ 0.0%</span></div>
+          <div class="blbl">Total Balance</div>
+          <div class="bval">$0.00</div>
+          <div class="bsub">≈ 0.00000000 BTC</div>
+        </div>
+        <div class="bcard c2">
+          <div class="bcard-top"><div class="bcard-ico">📈</div><span class="bchg p">▲ 0.0%</span></div>
+          <div class="blbl">Total P&amp;L</div>
+          <div class="bval" style="color:var(--green)">$0.00</div>
+          <div class="bsub">Since account opened</div>
+        </div>
+        <div class="bcard c3">
+          <div class="bcard-top"><div class="bcard-ico">₿</div><span class="bchg p">▲ 0.0%</span></div>
+          <div class="blbl">BTC Balance</div>
+          <div class="bval">0.0000 BTC</div>
+          <div class="bsub" id="d-btcusd">≈ $0.00 USD</div>
+        </div>
+        <div class="bcard c4">
+          <div class="bcard-top"><div class="bcard-ico">💰</div><span class="bchg p">▲ 0.0%</span></div>
+          <div class="blbl">Invested (Plans)</div>
+          <div class="bval" style="color:var(--gold)">$0.00</div>
+          <div class="bsub">No active plans</div>
+        </div>
+      </div>
+
+      <!-- Portfolio Chart -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">📊 Portfolio Value</div>
+            <div class="card-sub">$0.00 · <span style="color:var(--text2)">Deposit BTC to get started</span></div>
+          </div>
+          <div class="tf-row">
+            <button class="tf" onclick="sTF(this)">1D</button>
+            <button class="tf" onclick="sTF(this)">1W</button>
+            <button class="tf on" onclick="sTF(this)">1M</button>
+            <button class="tf" onclick="sTF(this)">All</button>
+          </div>
+        </div>
+        <div class="csvg">
+          <svg viewBox="0 0 500 160" preserveAspectRatio="none" style="height:160px;">
+            <defs>
+              <linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(0,200,255,0.2)"/>
+                <stop offset="100%" stop-color="rgba(0,200,255,0)"/>
+              </linearGradient>
+              <linearGradient id="cl1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#00c8ff"/>
+                <stop offset="100%" stop-color="#00e5a0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="40" x2="500" y2="40" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="500" y2="120" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <path d="M0,150 L31,142 L63,132 L94,137 L125,120 L156,104 L188,112 L219,92 L250,100 L281,80 L313,62 L344,72 L375,50 L406,38 L438,26 L469,18 L500,10 L500,160 L0,160Z" fill="url(#cg1)"/>
+            <path d="M0,150 L31,142 L63,132 L94,137 L125,120 L156,104 L188,112 L219,92 L250,100 L281,80 L313,62 L344,72 L375,50 L406,38 L438,26 L469,18 L500,10" fill="none" stroke="url(#cl1)" stroke-width="2"/>
+            <text x="6" y="38" font-family="JetBrains Mono" font-size="8" fill="rgba(255,255,255,0.2)">$28K</text>
+            <text x="6" y="78" font-family="JetBrains Mono" font-size="8" fill="rgba(255,255,255,0.2)">$22K</text>
+            <text x="6" y="118" font-family="JetBrains Mono" font-size="8" fill="rgba(255,255,255,0.2)">$18K</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Allocation + Activity row -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h">
+            <div><div class="card-title">🥧 Allocation</div><div class="card-sub">By asset weight</div></div>
+          </div>
+          <div class="alloc-list">
+            <div class="alloc-row"><div class="al-dot" style="background:#00c8ff"></div><div class="al-name">Bitcoin</div><div class="al-bar"><div class="al-fill" style="width:62%;background:#00c8ff"></div></div><div class="al-pct">—</div></div>
+            <div class="alloc-row"><div class="al-dot" style="background:#627eea"></div><div class="al-name">Ethereum</div><div class="al-bar"><div class="al-fill" style="width:0%;background:#627eea"></div></div><div class="al-pct">—</div></div>
+            <div class="alloc-row"><div class="al-dot" style="background:#9945ff"></div><div class="al-name">Solana</div><div class="al-bar"><div class="al-fill" style="width:0%;background:#9945ff"></div></div><div class="al-pct">—</div></div>
+            <div class="alloc-row"><div class="al-dot" style="background:#f0b90b"></div><div class="al-name">BNB</div><div class="al-bar"><div class="al-fill" style="width:0%;background:#f0b90b"></div></div><div class="al-pct">—</div></div>
+            <div class="alloc-row" style="border:none;"><div style="width:100%;text-align:center;color:var(--muted);font-size:0.75rem;padding:8px 0;">Deposit BTC to see allocation</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <div class="card-title">⚡ Recent Activity</div>
+            <span class="card-link">View all</span>
+          </div>
+          <div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:0.82rem;">
+            <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+            No transactions yet.<br>Deposit BTC to get started.
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Overview -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">🌐 Live Market Prices</div>
+          <span class="livebadge" style="font-size:0.68rem;"><span class="live-dot" style="width:5px;height:5px;"></span> Live</span>
+        </div>
+        <div id="mkt-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── TRADE ─────────── -->
+  <div class="view" id="v-trade">
+    <div class="v-trade-wrap">
+
+      <!-- Ticker Strip -->
+      <div class="ticker-strip" id="ticker"></div>
+
+      <!-- Chart -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title" style="font-size:1rem;">BTC / USD <span style="color:var(--green);font-size:0.8rem;margin-left:4px;">▲ +2.34%</span></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;color:var(--accent);margin-top:2px;" id="t-lp">$97,420.00</div>
+          </div>
+          <div class="tf-row">
+            <button class="tf" onclick="sTF(this)">1H</button>
+            <button class="tf" onclick="sTF(this)">4H</button>
+            <button class="tf on" onclick="sTF(this)">1D</button>
+            <button class="tf" onclick="sTF(this)">1W</button>
+          </div>
+        </div>
+        <div class="csvg">
+          <svg viewBox="0 0 700 240" preserveAspectRatio="none" style="height:220px;">
+            <defs>
+              <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(0,200,255,0.2)"/>
+                <stop offset="100%" stop-color="rgba(0,200,255,0)"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="60" x2="700" y2="60" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="700" y2="120" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <line x1="0" y1="180" x2="700" y2="180" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+            <path d="M0,210 L44,198 L88,184 L132,190 L175,170 L219,150 L263,160 L307,136 L350,146 L394,120 L438,98 L482,110 L525,80 L569,62 L613,46 L656,34 L700,20 L700,240 L0,240Z" fill="url(#cg2)"/>
+            <path d="M0,210 L44,198 L88,184 L132,190 L175,170 L219,150 L263,160 L307,136 L350,146 L394,120 L438,98 L482,110 L525,80 L569,62 L613,46 L656,34 L700,20" fill="none" stroke="#00c8ff" stroke-width="2.5"/>
+            <line x1="0" y1="20" x2="700" y2="20" stroke="rgba(0,229,160,0.3)" stroke-width="1" stroke-dasharray="5,4"/>
+            <text x="8" y="58" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">$102K</text>
+            <text x="8" y="118" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">$95K</text>
+            <text x="8" y="178" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.2)">$88K</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Tab selector for order/book/fills on mobile -->
+      <div class="card" style="margin-top:14px;">
+        <div class="ptabs">
+          <div class="ptab on" onclick="sPTab(this,'tp-ord')">Place Order</div>
+          <div class="ptab" onclick="sPTab(this,'tp-book')">Order Book</div>
+          <div class="ptab" onclick="sPTab(this,'tp-fills')">Trade Fills</div>
+        </div>
+
+        <!-- Order form -->
+        <div id="tp-ord" style="padding:16px;">
+          <div class="tbal">
+            <div class="tbal-l">Available Balance</div>
+            <div class="tbal-v">$0.00</div>
+            <div class="tbal-b">≈ 0.00000000 BTC</div>
+          </div>
+          <button class="tbtn-dep" onclick="openDep()">₿ Deposit via Bitcoin to start trading</button>
+          <div class="side-btns">
+            <button class="sbtn buy" id="sb-buy" onclick="setTSide('buy')">▲ Buy Long</button>
+            <button class="sbtn" id="sb-sell" onclick="setTSide('sell')">▼ Sell Short</button>
+          </div>
+          <label class="tlbl">Order Type</label>
+          <select class="tinput" style="cursor:pointer;margin-bottom:11px;"><option>Market</option><option>Limit</option><option>Stop-Limit</option></select>
+          <label class="tlbl">Amount (USD)</label>
+          <input class="tinput" type="number" value="" placeholder="0.00" inputmode="decimal">
+          <label class="tlbl">Leverage</label>
+          <div class="levrow" style="margin-bottom:12px;">
+            <button class="levbtn" onclick="sLev(this)">1×</button>
+            <button class="levbtn" onclick="sLev(this)">5×</button>
+            <button class="levbtn on" onclick="sLev(this)">10×</button>
+            <button class="levbtn" onclick="sLev(this)">25×</button>
+            <button class="levbtn" onclick="sLev(this)">50×</button>
+          </div>
+          <div class="tsum">
+            <div class="trow"><span>Position Size</span><span>$0.00</span></div>
+            <div class="trow"><span>Entry Price</span><span id="t-ep">$97,420.00</span></div>
+            <div class="trow"><span>Liq. Price</span><span style="color:var(--red)">—</span></div>
+            <div class="trow"><span>Fee (0.04%)</span><span>$0.00</span></div>
+          </div>
+          <button class="texec" id="texec" onclick="execTrade()">▲ Open Long BTC/USD</button>
+        </div>
+
+        <!-- Order book -->
+        <div id="tp-book" style="display:none;padding:8px 0 12px;">
+          <div class="ob-hdr"><div class="ob-th">Price</div><div class="ob-th">Size</div><div class="ob-th">Total</div></div>
+          <div id="ob-asks"></div>
+          <div class="ob-mid" id="ob-mid">$97,420 <span>Spread 0.02%</span></div>
+          <div id="ob-bids"></div>
+        </div>
+
+        <!-- Fills -->
+        <div id="tp-fills" style="display:none;padding:14px 16px;">
+          <div id="fills-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── INVESTMENTS ─────────── -->
+  <div class="view" id="v-invest">
+    <div class="invest">
+
+      <div class="inv-hero">
+        <h2>💰 Investment Plans</h2>
+        <p>Grow your Bitcoin automatically. Choose a managed plan — earnings are credited daily to your balance and can be compounded or withdrawn at maturity.</p>
+        <div class="inv-stats">
+          <div class="invs"><span class="invs-v">$0</span><span class="invs-l">Your Invested</span></div>
+          <div class="invs"><span class="invs-v">$0</span><span class="invs-l">Total Earned</span></div>
+          <div class="invs"><span class="invs-v">0</span><span class="invs-l">Active Plans</span></div>
+        </div>
+      </div>
+
+      <div class="sec-title">Available Plans</div>
+      <div class="plans">
+        <div class="plan s">
+          <div class="plan-ico">🚀</div>
+          <div class="plan-name">Starter</div>
+          <div class="plan-desc">Perfect for beginners. Low risk, steady daily returns on your Bitcoin deposit.</div>
+          <div class="plan-ret">5%</div>
+          <div class="plan-ret-sub">weekly return · min $100</div>
+          <ul class="plan-feats">
+            <li>Daily compounding</li><li>7-day plan duration</li><li>Withdraw anytime</li><li>24/7 support</li>
+          </ul>
+          <button class="plan-btn" onclick="openInvModal('Starter','5% weekly','$100',7,0.05)">Invest Now →</button>
+        </div>
+        <div class="plan g feat">
+          <div class="plan-badge">POPULAR</div>
+          <div class="plan-ico">📈</div>
+          <div class="plan-name">Growth</div>
+          <div class="plan-desc">Our most popular plan. Balanced risk-reward with higher returns and 14-day lock.</div>
+          <div class="plan-ret">12%</div>
+          <div class="plan-ret-sub">weekly return · min $500</div>
+          <ul class="plan-feats">
+            <li>Daily + reinvestment</li><li>14-day duration</li><li>Priority withdrawals</li><li>Account manager</li>
+          </ul>
+          <button class="plan-btn" onclick="openInvModal('Growth','12% weekly','$500',14,0.12)">Invest Now →</button>
+        </div>
+        <div class="plan e">
+          <div class="plan-ico">💎</div>
+          <div class="plan-name">Elite</div>
+          <div class="plan-desc">Maximum returns for serious investors. 30-day lock with the highest tier payouts.</div>
+          <div class="plan-ret">25%</div>
+          <div class="plan-ret-sub">weekly return · min $2,000</div>
+          <ul class="plan-feats">
+            <li>Aggressive compounding</li><li>30-day duration</li><li>VIP withdrawals</li><li>Personal advisor</li>
+          </ul>
+          <button class="plan-btn" onclick="openInvModal('Elite','25% weekly','$2,000',30,0.25)">Invest Now →</button>
+        </div>
+      </div>
+
+      <div class="sec-title">Your Active Plans</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:32px 16px;text-align:center;color:var(--muted);font-size:0.84rem;margin-bottom:20px;">
+        <div style="font-size:2rem;margin-bottom:8px;">📋</div>
+        No active plans yet.<br>Choose a plan above and deposit BTC to get started.
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="card-title">ℹ️ How Investment Plans Work</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-ico">₿</div><div class="how-t">1. Deposit BTC</div><div class="how-d">Fund your account via the Bitcoin address provided.</div></div>
+          <div class="how-step"><div class="how-ico">📋</div><div class="how-t">2. Choose a Plan</div><div class="how-d">Select Starter, Growth, or Elite based on your goals.</div></div>
+          <div class="how-step"><div class="how-ico">📈</div><div class="how-t">3. Earn Daily</div><div class="how-d">Profits are credited to your balance each day.</div></div>
+          <div class="how-step"><div class="how-ico">💸</div><div class="how-t">4. Withdraw BTC</div><div class="how-d">At maturity, withdraw your principal + earnings.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── PORTFOLIO ─────────── -->
+  <div class="view" id="v-port">
+    <div class="port">
+      <div class="welcome">
+        <div><h2>📊 Portfolio</h2><p>Your assets, performance and transaction history</p></div>
+        <button class="btn-dep" onclick="openDep()">₿ Deposit BTC</button>
+      </div>
+
+      <div class="bcards">
+        <div class="bcard c1"><div class="bcard-top"><div class="bcard-ico">💼</div><span class="bchg p">▲ 0.0%</span></div><div class="blbl">Net Worth</div><div class="bval">$0.00</div><div class="bsub">All assets</div></div>
+        <div class="bcard c2"><div class="bcard-top"><div class="bcard-ico">🎯</div><span class="bchg p">▲ 0.0%</span></div><div class="blbl">Realized P&amp;L</div><div class="bval" style="color:var(--green)">$0.00</div><div class="bsub">Closed trades</div></div>
+        <div class="bcard c3"><div class="bcard-top"><div class="bcard-ico">⚡</div><span class="bchg p">▲ 0.0%</span></div><div class="blbl">Unrealized P&amp;L</div><div class="bval" style="color:var(--green)">$0.00</div><div class="bsub">Open positions</div></div>
+        <div class="bcard c4"><div class="bcard-top"><div class="bcard-ico">📊</div><span class="bchg p">—</span></div><div class="blbl">Win Rate</div><div class="bval" style="color:var(--gold)">—</div><div class="bsub">No trades yet</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><div class="card-title">📈 Performance History</div></div>
+          <div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:0.82rem;">
+            <div style="font-size:2rem;margin-bottom:8px;">📉</div>
+            No performance data yet.<br>Start trading to track your history.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">🗂️ Transaction History</div></div>
+          <div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:0.82rem;">
+            <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+            No transactions yet.<br>Deposit BTC to get started.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── SETTINGS ─────────── -->
+  <div class="view" id="v-settings">
+    <div class="settings-page">
+
+      <div class="welcome">
+        <div><h2>⚙️ Settings</h2></div>
+      </div>
+
+      <!-- Profile -->
+      <div class="settings-section-title">Profile</div>
+      <div class="card settings-card">
+        <div class="settings-profile-header">
+          <div class="settings-avatar-big">U</div>
+          <div>
+            <div class="settings-username">Username</div>
+            <div class="settings-email-disp" id="settings-email-disp">user@email.com</div>
+          </div>
+          <button class="settings-edit-btn" onclick="toggleEditProfile()">✏️ Edit</button>
+        </div>
+        <div id="edit-profile-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+          <div class="settings-field-row">
+            <div class="settings-field">
+              <label>First Name</label>
+              <input type="text" placeholder="First name" value="">
+            </div>
+            <div class="settings-field">
+              <label>Last Name</label>
+              <input type="text" placeholder="Last name" value="">
+            </div>
+          </div>
+          <div class="settings-field">
+            <label>Username</label>
+            <input type="text" placeholder="Username" value="">
+          </div>
+          <div class="settings-field">
+            <label>Email Address</label>
+            <input type="email" placeholder="your@email.com" value="">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="settings-save-btn" onclick="saveProfile()">Save Changes</button>
+            <button class="settings-cancel-btn" onclick="toggleEditProfile()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="settings-section-title">Security</div>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">🔐 Change Password</div>
+            <div class="settings-row-sub">Update your account password</div>
+          </div>
+          <button class="settings-action-btn" onclick="toggleChangePw()">Change</button>
+        </div>
+        <div id="change-pw-form" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:2px;">
+          <div class="settings-field">
+            <label>Current Password</label>
+            <input type="password" placeholder="Enter current password">
+          </div>
+          <div class="settings-field">
+            <label>New Password</label>
+            <input type="password" placeholder="New password (min 8 chars)">
+          </div>
+          <div class="settings-field">
+            <label>Confirm New Password</label>
+            <input type="password" placeholder="Repeat new password">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="settings-save-btn" onclick="savePassword()">Update Password</button>
+            <button class="settings-cancel-btn" onclick="toggleChangePw()">Cancel</button>
+          </div>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📱 Two-Factor Authentication</div>
+            <div class="settings-row-sub">Secure your account with 2FA</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-2fa" class="settings-toggle-input" onchange="toggle2FA(this)">
+            <label for="tog-2fa" class="settings-toggle"></label>
+          </div>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📧 Login Email Alerts</div>
+            <div class="settings-row-sub">Get notified of new sign-ins</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-email" class="settings-toggle-input" checked onchange="showToast('📧','Email alerts '+(this.checked?'enabled':'disabled'))">
+            <label for="tog-email" class="settings-toggle"></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="settings-section-title">Notifications</div>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📈 Trade Confirmations</div>
+            <div class="settings-row-sub">Notify when orders are executed</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-trade" class="settings-toggle-input" checked onchange="showToast('📈','Trade alerts '+(this.checked?'on':'off'))">
+            <label for="tog-trade" class="settings-toggle"></label>
+          </div>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">₿ Deposit Alerts</div>
+            <div class="settings-row-sub">Notify when BTC deposits confirm</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-dep" class="settings-toggle-input" checked onchange="showToast('₿','Deposit alerts '+(this.checked?'on':'off'))">
+            <label for="tog-dep" class="settings-toggle"></label>
+          </div>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">💰 Investment Payouts</div>
+            <div class="settings-row-sub">Notify when earnings are credited</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-inv" class="settings-toggle-input" checked onchange="showToast('💰','Payout alerts '+(this.checked?'on':'off'))">
+            <label for="tog-inv" class="settings-toggle"></label>
+          </div>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📉 Price Alerts</div>
+            <div class="settings-row-sub">Notify on significant price moves</div>
+          </div>
+          <div class="settings-toggle-wrap">
+            <input type="checkbox" id="tog-price" class="settings-toggle-input" onchange="showToast('📉','Price alerts '+(this.checked?'on':'off'))">
+            <label for="tog-price" class="settings-toggle"></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences -->
+      <div class="settings-section-title">Preferences</div>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">🌐 Display Currency</div>
+            <div class="settings-row-sub">Base currency for balance display</div>
+          </div>
+          <select class="settings-select" onchange="showToast('🌐','Currency set to '+this.value)">
+            <option>USD</option><option>EUR</option><option>GBP</option><option>NGN</option><option>BTC</option>
+          </select>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">⚡ Default Leverage</div>
+            <div class="settings-row-sub">Pre-fill leverage on trade orders</div>
+          </div>
+          <select class="settings-select" onchange="showToast('⚡','Default leverage set to '+this.value)">
+            <option>1×</option><option>5×</option><option selected>10×</option><option>25×</option><option>50×</option>
+          </select>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">🎨 Theme</div>
+            <div class="settings-row-sub">Interface appearance</div>
+          </div>
+          <select class="settings-select" onchange="showToast('🎨','Theme: '+this.value)">
+            <option selected>Dark</option><option>System</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Wallet -->
+      <div class="settings-section-title">Bitcoin Wallet</div>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📥 Deposit Address</div>
+            <div class="settings-row-sub" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--btc);word-break:break-all;margin-top:4px;">bc1q2rkevqy2x7eqks0grkqd8jlqxa56r6vngg98yg</div>
+          </div>
+          <button class="settings-action-btn" onclick="copyAddr();showToast('⧉','Address copied!')">Copy</button>
+        </div>
+        <div class="settings-row" style="border-top:1px solid var(--border);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">📤 Withdrawal Address</div>
+            <div class="settings-row-sub">Set your BTC withdrawal address</div>
+          </div>
+          <button class="settings-action-btn" onclick="showToast('📤','Set withdrawal address to enable withdrawals.')">Set</button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section-title" style="color:var(--red);">Danger Zone</div>
+      <div class="card settings-card" style="border-color:rgba(255,64,96,0.2);">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">🚪 Sign Out</div>
+            <div class="settings-row-sub">Sign out of your account</div>
+          </div>
+          <button class="settings-action-btn danger" onclick="doLogout()">Sign Out</button>
+        </div>
+        <div class="settings-row" style="border-top:1px solid rgba(255,64,96,0.15);margin-top:2px;padding-top:14px;">
+          <div class="settings-row-info">
+            <div class="settings-row-title">🗑️ Delete Account</div>
+            <div class="settings-row-sub">Permanently remove your account and data</div>
+          </div>
+          <button class="settings-action-btn danger" onclick="showToast('⚠️','Please contact support to delete your account.')">Delete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ═══════════════ DEPOSIT MODAL ═══════════════ -->
+<div class="modal-bg" id="dep-modal">
+  <div class="mbox">
+    <button class="mx" onclick="closeDep()">✕</button>
+    <div class="mtitle">Deposit Funds</div>
+    <div class="msub">Fund your account instantly with Bitcoin</div>
+    <div class="mbtc-banner">
+      <div class="mbtc-ico">₿</div>
+      <div><div class="mbtc-t">Bitcoin Deposits Only</div><div class="mbtc-s">Tradespher exclusively accepts BTC — fast, borderless, always available.</div></div>
+    </div>
+    <label class="mlbl">Amount (USD)</label>
+    <div class="mrow">
+      <input class="minput" type="number" placeholder="Enter amount" id="d-amt" oninput="calcDep(this.value)" inputmode="decimal">
+      <div class="mcurr">USD</div>
+    </div>
+    <div class="mbtceq" id="d-btceq">≈ 0.00000000 BTC</div>
+    <div class="qr-c"><div class="qr-w"><div class="qr"></div><div style="text-align:center;margin-top:6px;font-size:0.6rem;color:#555;font-family:'JetBrains Mono',monospace;">Scan to deposit</div></div></div>
+    <div class="addr-box">
+      <div class="addr-lbl">Your Bitcoin Deposit Address</div>
+      <div class="addr-val">bc1q2rkevqy2x7eqks0grkqd8jlqxa56r6vngg98yg</div>
+    </div>
+    <button class="copybtn" id="copybtn" onclick="copyAddr()"><span id="c-ico">⧉</span> <span id="c-txt">Copy Bitcoin Address</span></button>
+    <div class="infotip"><strong>⚡ 2 confirmations</strong> required (~20 min). Send <strong>BTC only</strong>. Minimum deposit: <strong>$10</strong>.</div>
+    <button class="mconfirm" onclick="confirmDep()">₿ I've Sent the Bitcoin</button>
+  </div>
+</div>
+
+<!-- ═══════════════ INVEST MODAL ═══════════════ -->
+<div class="modal-bg" id="inv-modal">
+  <div class="mbox">
+    <button class="mx" onclick="closeInv()">✕</button>
+    <div class="mtitle" id="im-title">Invest in Plan</div>
+    <div class="msub" id="im-sub">Weekly return</div>
+    <div class="mbtc-banner">
+      <div class="mbtc-ico">₿</div>
+      <div><div class="mbtc-t">Funded via Bitcoin</div><div class="mbtc-s">Investment funds are deposited via BTC to your account address.</div></div>
+    </div>
+    <label class="mlbl">Investment Amount (USD)</label>
+    <div class="mrow">
+      <input class="minput" type="number" id="im-amt" placeholder="0.00" oninput="calcInv(this.value)" inputmode="decimal">
+      <div class="mcurr">USD</div>
+    </div>
+    <div class="mbtceq" id="im-btceq">≈ 0.00000000 BTC</div>
+    <div class="msum">
+      <div class="trow"><span style="font-size:0.76rem;color:var(--text2)">Weekly Earnings</span><span style="color:var(--green)" id="im-earn">$0.00</span></div>
+      <div class="trow" style="margin-top:5px;"><span style="font-size:0.76rem;color:var(--text2)">Plan Duration</span><span id="im-dur">—</span></div>
+      <div class="trow" style="margin-top:5px;"><span style="font-size:0.76rem;color:var(--text2)">Total Return</span><span style="color:var(--gold)" id="im-total">$0.00</span></div>
+    </div>
+    <div class="addr-box">
+      <div class="addr-lbl">Deposit Bitcoin to</div>
+      <div class="addr-val">bc1q2rkevqy2x7eqks0grkqd8jlqxa56r6vngg98yg</div>
+    </div>
+    <button class="copybtn" onclick="copyAddr()">⧉ Copy Deposit Address</button>
+    <button class="mconfirm" onclick="confirmInv()">💰 Confirm Investment</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="t-ico">✓</span>
+  <span id="t-txt" style="font-size:0.82rem;font-weight:500;"></span>
+</div>
+
+<script>
+const ADDR='bc1q2rkevqy2x7eqks0grkqd8jlqxa56r6vngg98yg';
+let btcP=97420;
+let curPlan={rate:0.12,weeks:2,days:14};
+
+/* ── AUTH ── */
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function doLogin(){
+  goPage('pg-app');
+  buildTicker();buildMkt();buildOB();
+  showToast('👋','Welcome to Tradespher! Deposit BTC to get started.');
+}
+
+/* ── VIEW SWITCHING ── */
+function switchView(tab,vid){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  if(tab&&tab.classList) tab.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(vid).classList.add('on');
+  window.scrollTo(0,0);
+  // sync mobile nav
+  const map={
+    'v-dash':'mn-dash','v-trade':'mn-trade',
+    'v-invest':'mn-invest','v-port':'mn-port'
+  };
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('on'));
+  if(map[vid]){const m=document.getElementById(map[vid]);if(m)m.classList.add('on');}
+}
+
+function mobNav(btn,vid){
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(vid).classList.add('on');
+  // sync top nav tabs
+  const map={'v-dash':0,'v-trade':1,'v-invest':2,'v-port':3,'v-settings':4};
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  const tabs=document.querySelectorAll('.ntab');
+  if(map[vid]!==undefined&&tabs[map[vid]])tabs[map[vid]].classList.add('on');
+  window.scrollTo(0,0);
+  if(vid==='v-trade'){buildOB();}
+}
+
+/* ── SETTINGS HELPERS ── */
+function highlightSettingsTab(){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  const tabs=document.querySelectorAll('.ntab');
+  if(tabs[4])tabs[4].classList.add('on');
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('on'));
+  const ms=document.getElementById('mn-settings');if(ms)ms.classList.add('on');
+}
+
+function toggleEditProfile(){
+  const f=document.getElementById('edit-profile-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+}
+
+function saveProfile(){
+  toggleEditProfile();
+  showToast('✅','Profile updated successfully!');
+}
+
+function toggleChangePw(){
+  const f=document.getElementById('change-pw-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+}
+
+function savePassword(){
+  toggleChangePw();
+  showToast('🔐','Password updated successfully!');
+}
+
+function toggle2FA(el){
+  showToast('📱','Two-factor authentication '+(el.checked?'enabled':'disabled')+'.');
+}
+
+function doLogout(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-login').classList.add('on');
+  showToast('👋','You have been signed out.');
+}
+
+/* ── TF BUTTONS ── */
+function sTF(el){
+  el.closest('.tf-row').querySelectorAll('.tf').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+/* ── LIVE PRICE ── */
+setInterval(()=>{
+  btcP+=(Math.random()-0.48)*55;
+  btcP=Math.round(btcP*100)/100;
+  const f='$'+btcP.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  ['t-lp','t-ep'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=f;});
+},2200);
+
+/* ── TICKER ── */
+function buildTicker(){
+  const tks=[
+    {n:'BTC/USD',p:'$97,420',c:'+2.34%',pos:true},
+    {n:'ETH/USD',p:'$3,218',c:'+1.87%',pos:true},
+    {n:'SOL/USD',p:'$187.92',c:'-0.42%',pos:false},
+    {n:'BNB/USD',p:'$614.80',c:'+0.95%',pos:true},
+    {n:'ADA/USD',p:'$0.683',c:'-1.12%',pos:false},
+    {n:'DOT/USD',p:'$8.42',c:'+0.61%',pos:true}
+  ];
+  const el=document.getElementById('ticker');if(!el)return;
+  el.innerHTML=tks.map((t,i)=>`<div class="tk-item${i===0?' on':''}"><div class="tk-n">${t.n}</div><div class="tk-p">${t.p}</div><div class="tk-c ${t.pos?'p':'n'}">${t.pos?'▲':'▼'} ${t.c}</div></div>`).join('');
+}
+
+/* ── MARKET LIST ── */
+const mkts=[
+  {n:'BTC/USD',p:97420,c:2.34,pos:true},
+  {n:'ETH/USD',p:3218,c:1.87,pos:true},
+  {n:'SOL/USD',p:187.92,c:0.42,pos:false},
+  {n:'BNB/USD',p:614.80,c:0.95,pos:true},
+  {n:'ADA/USD',p:0.683,c:1.12,pos:false},
+  {n:'DOT/USD',p:8.42,c:0.61,pos:true}
+];
+function buildMkt(){
+  const el=document.getElementById('mkt-list');if(!el)return;
+  el.innerHTML=mkts.map(m=>`<div class="mkt-r"><span class="mkt-nm">${m.n}</span><span class="mkt-p">$${m.p.toLocaleString()}</span><span class="mkt-ch" style="color:${m.pos?'var(--green)':'var(--red)'}">${m.pos?'▲':'▼'} ${m.c}%</span></div>`).join('');
+}
+
+/* ── TRADE FORM ── */
+function setTSide(s){
+  const b=document.getElementById('sb-buy'),sl=document.getElementById('sb-sell'),ex=document.getElementById('texec');
+  if(s==='buy'){b.className='sbtn buy';sl.className='sbtn';ex.className='texec';ex.textContent='▲ Open Long BTC/USD';}
+  else{sl.className='sbtn sell';b.className='sbtn';ex.className='texec sm';ex.textContent='▼ Open Short BTC/USD';}
+}
+function sLev(el){el.closest('.levrow').querySelectorAll('.levbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function execTrade(){showToast('⚡','Deposit BTC first to start trading!');}
+
+/* ── PANEL TABS ── */
+function sPTab(el,id){
+  el.closest('.ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  ['tp-ord','tp-book','tp-fills'].forEach(p=>{
+    const e=document.getElementById(p);
+    if(e)e.style.display=p===id?'block':'none';
+  });
+  if(id==='tp-book')buildOB();
+  if(id==='tp-fills')buildFills();
+}
+
+/* ── ORDER BOOK ── */
+function buildOB(){
+  const a=document.getElementById('ob-asks'),b=document.getElementById('ob-bids'),m=document.getElementById('ob-mid');
+  if(!a||!b)return;
+  const base=Math.round(btcP);
+  let ah='',bh='';
+  for(let i=5;i>=1;i--){
+    const p=(base+i*20).toLocaleString(),s=(Math.random()*2+0.3).toFixed(3),w=20+Math.round(Math.random()*70);
+    ah+=`<div class="ob-row"><div class="ob-fill a" style="width:${w}%"></div><div class="ob-p a">${p}</div><div style="color:var(--text2);font-size:0.7rem">${s}</div><div style="color:var(--muted);font-size:0.68rem">${Math.round(parseFloat(s)*(base+i*20)).toLocaleString()}</div></div>`;
+  }
+  for(let i=1;i<=5;i++){
+    const p=(base-i*20).toLocaleString(),s=(Math.random()*2+0.3).toFixed(3),w=20+Math.round(Math.random()*70);
+    bh+=`<div class="ob-row"><div class="ob-fill b" style="width:${w}%"></div><div class="ob-p b">${p}</div><div style="color:var(--text2);font-size:0.7rem">${s}</div><div style="color:var(--muted);font-size:0.68rem">${Math.round(parseFloat(s)*(base-i*20)).toLocaleString()}</div></div>`;
+  }
+  a.innerHTML=ah;b.innerHTML=bh;
+  if(m)m.innerHTML='$'+base.toLocaleString()+' <span>Spread 0.02%</span>';
+}
+setInterval(buildOB,3500);
+
+function buildFills(){
+  const fills=[
+    {p:'BTC/USD',s:'Buy',pr:'97,200',t:'2m ago'},
+    {p:'ETH/USD',s:'Sell',pr:'3,224',t:'7m ago'},
+    {p:'BTC/USD',s:'Buy',pr:'96,980',t:'15m ago'},
+    {p:'SOL/USD',s:'Sell',pr:'189.40',t:'23m ago'}
+  ];
+  const el=document.getElementById('fills-list');if(!el)return;
+  el.innerHTML=fills.map(f=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-weight:600;font-size:0.8rem">${f.p}</div><div style="font-size:0.67rem;color:${f.s==='Buy'?'var(--green)':'var(--red)'}">${f.s}</div></div>
+      <div style="text-align:right"><div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem">$${f.pr}</div><div style="font-size:0.65rem;color:var(--muted)">${f.t}</div></div>
+    </div>`).join('');
+}
+
+/* ── DEPOSIT MODAL ── */
+function openDep(){document.getElementById('dep-modal').classList.add('on');}
+function closeDep(){document.getElementById('dep-modal').classList.remove('on');}
+function calcDep(v){
+  document.getElementById('d-btceq').textContent='≈ '+(v&&parseFloat(v)>0?(parseFloat(v)/btcP).toFixed(8):'0.00000000')+' BTC';
+}
+function copyAddr(){
+  navigator.clipboard.writeText(ADDR).then(()=>{
+    const b=document.getElementById('copybtn'),i=document.getElementById('c-ico'),t=document.getElementById('c-txt');
+    if(b){b.classList.add('done');i.textContent='✓';t.textContent='Copied!';}
+    setTimeout(()=>{if(b){b.classList.remove('done');i.textContent='⧉';t.textContent='Copy Bitcoin Address';}},2500);
+    showToast('✓','Address copied!');
+  }).catch(()=>showToast('⧉','Copy: bc1q2rkevqy...98yg'));
+}
+function confirmDep(){closeDep();showToast('₿','Awaiting Bitcoin confirmation on-chain (~20 min).');}
+
+/* ── INVEST MODAL ── */
+function openInvModal(name,ret,min,days,rate){
+  curPlan={name,ret,min,days,rate,weeks:Math.ceil(days/7)};
+  document.getElementById('im-title').textContent='Invest in '+name+' Plan';
+  document.getElementById('im-sub').textContent=ret+' return · Min. '+min;
+  document.getElementById('im-dur').textContent=days+' days';
+  document.getElementById('im-amt').value='';
+  ['im-btceq','im-earn','im-total'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e)e.textContent=id==='im-btceq'?'≈ 0.00000000 BTC':'$0.00';
+  });
+  document.getElementById('inv-modal').classList.add('on');
+}
+function closeInv(){document.getElementById('inv-modal').classList.remove('on');}
+function calcInv(v){
+  if(!v||parseFloat(v)<=0)return;
+  const a=parseFloat(v);
+  document.getElementById('im-btceq').textContent='≈ '+(a/btcP).toFixed(8)+' BTC';
+  document.getElementById('im-earn').textContent='$'+(a*curPlan.rate).toFixed(2);
+  document.getElementById('im-total').textContent='$'+(a+a*curPlan.rate*curPlan.weeks).toFixed(2);
+}
+function confirmInv(){
+  const v=document.getElementById('im-amt').value;
+  if(!v||parseFloat(v)<=0){showToast('⚠️','Please enter an amount.');return;}
+  closeInv();showToast('💰','Plan selected! Deposit BTC to activate your '+curPlan.name+' plan.');
+}
+
+/* ── MODAL CLOSE ON BG CLICK ── */
+['dep-modal','inv-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.remove('on');});
+});
+
+/* ── TOAST ── */
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('t-ico').textContent=ico;
+  document.getElementById('t-txt').textContent=msg;
+  t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),3500);
+}
+</script>
+</body>
+</html>
